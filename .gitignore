@@ -100,6 +100,7 @@ Intermediate-llvm/
 NONE
 temp.txt
 .vs/
+.vscode/
 *.pyc
 windows_amd64/
 *.mov

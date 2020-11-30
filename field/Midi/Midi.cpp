@@ -191,29 +191,34 @@ void AudioCallback(float *in, float *out, size_t size)
 // Typical Switch case for Message Type.
 void HandleMidiMessage(MidiEvent m)
 {
-    switch(m.type)
+    // hardcoded midi Channel for now (midi channel 1)
+    if(m.channel == 0)
     {
-        case NoteOn:
+        switch(m.type)
         {
-            NoteOnEvent p = m.AsNoteOn();
-			// Note Off can come in as Note On w/ 0 Velocity
-            if(p.velocity == 0.f)
+            case NoteOn:
             {
+                NoteOnEvent p = m.AsNoteOn();
+                // Note Off can come in as Note On w/ 0 Velocity
+                //  && m.channel == 6
+                if(p.velocity == 0.f)
+                {
+                    voice_handler.OnNoteOff(p.note, p.velocity);
+                }
+                else
+                {
+                    voice_handler.OnNoteOn(p.note, p.velocity);
+                }
+            }
+            break;
+            case NoteOff:
+            {
+                NoteOnEvent p = m.AsNoteOn();
                 voice_handler.OnNoteOff(p.note, p.velocity);
             }
-            else
-            {
-                voice_handler.OnNoteOn(p.note, p.velocity);
-            }
+            break;
+            default: break;
         }
-        break;
-        case NoteOff:
-        {
-            NoteOnEvent p = m.AsNoteOn();
-            voice_handler.OnNoteOff(p.note, p.velocity);
-        }
-        break;
-        default: break;
     }
 }
 

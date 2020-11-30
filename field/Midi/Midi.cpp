@@ -155,11 +155,24 @@ class VoiceManager
 
 static VoiceManager<24> voice_handler;
 
+float kvals[8];
+float cvvals[4];
+
 void AudioCallback(float *in, float *out, size_t size)
 {
     float sum = 0.f;
     hw.UpdateDigitalControls();
     hw.ProcessAnalogControls();
+
+    // get knob values
+    for(int i = 0; i < 8; i++)
+    {
+        kvals[i] = hw.GetKnobValue(i);
+        if(i < 4)
+        {
+            cvvals[i] = hw.GetCvValue(i);
+        }
+    }
     if(hw.GetSwitch(hw.SW_1)->FallingEdge())
     {
         voice_handler.FreeAllVoices();

@@ -59,6 +59,11 @@ class Voice
         env_gate_ = false;
     }
 
+    // Envelop
+    void SetEnvAttack(float val) { env_.SetTime(ADSR_SEG_ATTACK, val); }
+    void SetEnvDecay(float val) { env_.SetTime(ADSR_SEG_DECAY, val); }
+    void SetEnvSustain(float val) {env_.SetSustainLevel(val); }
+    void SetEnvRelease(float val) { env_.SetTime(ADSR_SEG_RELEASE, val); }
     void SetCutoff(float val) { filt_.SetFreq(val); }
     // Waveform selection
     void IncrementWaveform()
@@ -150,6 +155,37 @@ class VoiceManager
         }
     }
 
+    void SetEnvAttack(float all_val)
+    {
+        for(size_t i = 0; i < max_voices; i++)
+        {
+            voices[i].SetEnvAttack(all_val);
+        }
+    }
+
+    void SetEnvDecay(float all_val)
+    {
+        for(size_t i = 0; i < max_voices; i++)
+        {
+            voices[i].SetEnvDecay(all_val);
+        }
+    }
+
+    void SetEnvRelease(float all_val)
+    {
+        for(size_t i = 0; i < max_voices; i++)
+        {
+            voices[i].SetEnvRelease(all_val);
+        }
+    }
+
+    void SetEnvSustain(float all_val)
+    {
+        for(size_t i = 0; i < max_voices; i++)
+        {
+            voices[i].SetEnvSustain(all_val);
+        }
+    }
 
     void IncrementWaveform()
     {
@@ -207,6 +243,12 @@ void AudioCallback(float *in, float *out, size_t size)
     {
         voice_handler.IncrementWaveform();
     }
+
+    // Envelope
+    voice_handler.SetEnvAttack(kvals[3] * 0.5f);
+    voice_handler.SetEnvDecay(kvals[4] * 3.f);
+    voice_handler.SetEnvSustain(kvals[5] * 0.5f);
+    voice_handler.SetEnvRelease(kvals[6] * 1.0f);
 
     for(size_t i = 0; i < size; i += 2)
     {

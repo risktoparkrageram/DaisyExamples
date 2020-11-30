@@ -64,7 +64,10 @@ class Voice
     void SetEnvDecay(float val) { env_.SetTime(ADSR_SEG_DECAY, val); }
     void SetEnvSustain(float val) {env_.SetSustainLevel(val); }
     void SetEnvRelease(float val) { env_.SetTime(ADSR_SEG_RELEASE, val); }
+    // Filter
     void SetCutoff(float val) { filt_.SetFreq(val); }
+    void SetResonance(float val) { filt_.SetRes(val); }
+    void SetResDrive(float val) { filt_.SetDrive(val); }
     // Waveform selection
     void IncrementWaveform()
         {
@@ -155,6 +158,22 @@ class VoiceManager
         }
     }
 
+    void SetResonance(float all_val)
+    {
+        for(size_t i = 0; i < max_voices; i++)
+        {
+            voices[i].SetResonance(all_val);
+        }
+    }
+
+    void SetResDrive(float all_val)
+    {
+        for(size_t i = 0; i < max_voices; i++)
+        {
+            voices[i].SetResDrive(all_val);
+        }
+    }
+
     void SetEnvAttack(float all_val)
     {
         for(size_t i = 0; i < max_voices; i++)
@@ -232,17 +251,23 @@ void AudioCallback(float *in, float *out, size_t size)
             cvvals[i] = hw.GetCvValue(i);
         }
     }
+
+    // Free all voices
     if(hw.GetSwitch(hw.SW_1)->FallingEdge())
     {
         voice_handler.FreeAllVoices();
     }
-    voice_handler.SetCutoff(250.f + hw.GetKnobValue(hw.KNOB_1) * 8000.f);
 
     // Waveform
     if(hw.GetSwitch(hw.SW_2)->FallingEdge())
     {
         voice_handler.IncrementWaveform();
     }
+
+    // Filter
+    voice_handler.SetCutoff(250.f + kvals[0] * 8000.f);
+    voice_handler.SetResonance(kvals[1]);
+    voice_handler.SetResDrive(kvals[2]);
 
     // Envelope
     voice_handler.SetEnvAttack(kvals[3] * 0.5f);

@@ -18,7 +18,7 @@ class Voice
         active_ = false;
         osc_.Init(samplerate);
         osc_.SetAmp(0.75f);
-        osc_.SetWaveform(Oscillator::WAVE_POLYBLEP_SAW);
+        osc_.SetWaveform(Oscillator::WAVE_SIN);
         env_.Init(samplerate);
         env_.SetSustainLevel(0.5f);
         env_.SetTime(ADSR_SEG_ATTACK, 0.005f);
@@ -60,6 +60,21 @@ class Voice
     }
 
     void SetCutoff(float val) { filt_.SetFreq(val); }
+    // Waveform selection
+    void IncrementWaveform()
+        {
+            waveidx = (waveidx + 1) % 5;
+            osc_.SetWaveform(waveforms[waveidx]);
+        }
+
+    uint8_t waveforms[5] = {
+        Oscillator::WAVE_SIN,
+        Oscillator::WAVE_TRI,
+        Oscillator::WAVE_POLYBLEP_TRI,
+        Oscillator::WAVE_POLYBLEP_SAW,
+        Oscillator::WAVE_POLYBLEP_SQUARE,
+    };
+    uint8_t waveidx = 0;
 
     inline bool  IsActive() const { return active_; }
     inline float GetNote() const { return note_; }
@@ -136,6 +151,14 @@ class VoiceManager
     }
 
 
+    void IncrementWaveform()
+    {
+        for(size_t i =0; i < max_voices; i++)
+        {
+            voices[i].IncrementWaveform();
+        }
+    }
+
   private:
     Voice  voices[max_voices];
     Voice *FindFreeVoice()
@@ -178,6 +201,12 @@ void AudioCallback(float *in, float *out, size_t size)
         voice_handler.FreeAllVoices();
     }
     voice_handler.SetCutoff(250.f + hw.GetKnobValue(hw.KNOB_1) * 8000.f);
+
+    // Waveform
+    if(hw.GetSwitch(hw.SW_2)->FallingEdge())
+    {
+        voice_handler.IncrementWaveform();
+    }
 
     for(size_t i = 0; i < size; i += 2)
     {
